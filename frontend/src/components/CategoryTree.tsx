@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
+import { List, Button, Collapse, Card } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { Category } from '../services/categoryApi';
+
+const { Panel } = Collapse;
+const { Meta } = Card;
 
 interface CategoryTreeProps {
     categories: Category[];
@@ -8,6 +13,7 @@ interface CategoryTreeProps {
 
 const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, onDelete }) => {
     const [expandedCategories, setExpandedCategories] = useState<number[]>([]);
+    const navigate = useNavigate();
 
     const toggleCategory = (id: number) => {
         setExpandedCategories((prev) =>
@@ -15,50 +21,64 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, onDelete }) => 
         );
     };
 
+    const handleProductClick = (productId: number) => {
+        navigate(`/products/${productId}`); // Перехід на сторінку деталей продукту
+    };
+
     return (
-        <ul>
-            {categories.map((category) => (
-                <li key={category.id}>
-                    <div>
-                        <span
-                            style={{ cursor: 'pointer', color: 'blue' }}
-                            onClick={() => toggleCategory(category.id)}
-                        >
-                            {category.name}
-                        </span>
-                        <button onClick={() => onDelete(category.id)}>Delete</button>
-                    </div>
-                    {expandedCategories.includes(category.id) && (
-                        <div style={{ marginLeft: '20px' }}>
-                            {category.products?.length > 0 && (
-                                <ul>
-                                    <li>
-                                        <strong>Products:</strong>
-                                    </li>
-                                    {category.products.map((product) => (
-                                        <li key={product.id}>{product.name}</li>
-                                    ))}
-                                </ul>
-                            )}
-                            {category.subcategories?.length > 0 && (
-                                <ul>
-                                    <li>
-                                        <strong>Subcategories:</strong>
-                                    </li>
-                                    {category.subcategories.map((subcategory) => (
+        <List
+            dataSource={categories}
+            renderItem={(category) => (
+                <List.Item>
+                    <div style={{ width: '100%' }}>
+                        <Collapse>
+                            <Panel
+                                header={
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span>{category.name}</span>
+                                        <Button 
+                                            type="primary" 
+                                            danger 
+                                            onClick={() => onDelete(category.id)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </div>
+                                }
+                                key={category.id}
+                            >
+                                <div>
+                                    {category.products.length > 0 && (
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                                            {category.products.map((product) => (
+                                                <Card
+                                                    key={product.id}
+                                                    hoverable
+                                                    style={{ width: 240 }}
+                                                    cover={<img alt={product.name} src={product.image_url} />}
+                                                    onClick={() => handleProductClick(product.id)}
+                                                >
+                                                    <Meta 
+                                                        title={product.name} 
+                                                        description={`$${product.price}`} 
+                                                    />
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {category.subcategories.length > 0 && (
                                         <CategoryTree
-                                            key={subcategory.id}
-                                            categories={[subcategory]}
+                                            categories={category.subcategories}
                                             onDelete={onDelete}
                                         />
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                    )}
-                </li>
-            ))}
-        </ul>
+                                    )}
+                                </div>
+                            </Panel>
+                        </Collapse>
+                    </div>
+                </List.Item>
+            )}
+        />
     );
 };
 

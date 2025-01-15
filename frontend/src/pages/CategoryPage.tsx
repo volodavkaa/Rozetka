@@ -12,8 +12,14 @@ const CategoryPage: React.FC = () => {
   if (isLoading) return <p>Loading...</p>;
 
   const handleDelete = async (id: number) => {
-    await deleteCategory(id);
-  };
+    try {
+        await deleteCategory(id);
+        console.log(`Category with ID ${id} deleted successfully`);
+    } catch (error) {
+        console.error(`Error deleting category with ID ${id}:`, error);
+    }
+};
+
 
   return (
     <div>

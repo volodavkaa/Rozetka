@@ -3,25 +3,33 @@ import { useCreateProductMutation, useGetCategoriesQuery } from '../services/cat
 
 const CreateProductPage: React.FC = () => {
     const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
     const [price, setPrice] = useState<number | ''>('');
+    const [image_url, setImageUrl] = useState('');
     const [categoryId, setCategoryId] = useState<number | null>(null);
+
     const { data: categories, isLoading } = useGetCategoriesQuery();
-    const [createProduct] = useCreateProductMutation();
+    const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (categoryId && price) {
-            const payload = { name, price: Number(price), category: categoryId };
-            console.log("Payload to send:", payload); // Перевіряє, що ви надсилаєте правильні дані
-            await createProduct(payload);
+            await createProduct({
+                name,
+                description,
+                price: Number(price),
+                image_url,
+                category: categoryId,
+            });
+
+            
             setName('');
+            setDescription('');
             setPrice('');
+            setImageUrl('');
             setCategoryId(null);
-        } else {
-            console.error("Category ID or price is invalid:", { categoryId, price });
         }
     };
-    
 
     if (isLoading) return <p>Loading categories...</p>;
 
@@ -38,11 +46,26 @@ const CreateProductPage: React.FC = () => {
                     />
                 </label>
                 <label>
+                    Description:
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+                </label>
+                <label>
                     Price:
                     <input
                         type="number"
                         value={price}
                         onChange={(e) => setPrice(e.target.valueAsNumber || '')}
+                    />
+                </label>
+                <label>
+                    Image URL:
+                    <input
+                        type="text"
+                        value={image_url}
+                        onChange={(e) => setImageUrl(e.target.value)}
                     />
                 </label>
                 <label>
@@ -66,7 +89,9 @@ const CreateProductPage: React.FC = () => {
                         ))}
                     </select>
                 </label>
-                <button type="submit">Create Product</button>
+                <button type="submit" disabled={isCreating}>
+                    {isCreating ? 'Creating...' : 'Create Product'}
+                </button>
             </form>
         </div>
     );
