@@ -6,7 +6,6 @@ const CategoryListPage: React.FC = () => {
         <div>
             <h1>Category List</h1>
             <Link to="/create-category">Create New Category</Link>
-            {}
         </div>
     );
 };

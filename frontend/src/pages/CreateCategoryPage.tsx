@@ -6,6 +6,7 @@ const CreateCategoryPage: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Category name:', name);
+        // TODO: Надіслати дані на сервер
     };
 
     return (
