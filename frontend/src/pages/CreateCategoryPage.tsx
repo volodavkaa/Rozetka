@@ -3,10 +3,26 @@ import React, { useState } from 'react';
 const CreateCategoryPage: React.FC = () => {
     const [name, setName] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Category name:', name);
-        // TODO: Надіслати дані на сервер
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/categories/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name }),
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Category created:', data);
+                setName(''); 
+            } else {
+                console.error('Failed to create category');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     return (
