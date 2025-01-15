@@ -1,28 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useCreateCategoryMutation } from '../services/categoryApi';
 
 const CreateCategoryPage: React.FC = () => {
     const [name, setName] = useState('');
+    const [createCategory] = useCreateCategoryMutation();
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const response = await fetch('http://127.0.0.1:8000/api/categories/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name }),
-            });
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Category created:', data);
-                setName(''); 
-            } else {
-                console.error('Failed to create category');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        await createCategory({ name });
+        navigate('/categories'); 
     };
 
     return (

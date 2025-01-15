@@ -1,12 +1,23 @@
 from rest_framework import serializers
-from .models import Category
+from .models import Category, Product
+
+class ProductSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())  # Перевіряє категорію
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price', 'category']
+
 
 class CategorySerializer(serializers.ModelSerializer):
+    subcategories = serializers.SerializerMethodField()
+    products = ProductSerializer(many=True, read_only=True)  # Додати продукти до категорій
+
     class Meta:
         model = Category
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'parent', 'subcategories', 'products']
 
-    def validate_name(self, value):
-        if Category.objects.filter(name=value).exists():
-            raise serializers.ValidationError("Category with this name already exists!!")
-        return value
+    def get_subcategories(self, obj):
+        subcategories = obj.subcategories.all()
+        return CategorySerializer(subcategories, many=True).data
+
